@@ -7,89 +7,62 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-    :root{--primary:#003087;--accent:#0066cc;--success:#28a745;--danger:#dc3545;--gray:#f8f9fa;--dark:#1a1a1a}
-    body{font-family:'Segoe UI',Arial,sans-serif;margin:0;background:var(--gray);color:#333;line-height:1.4}
-    h1{background:var(--primary);color:white;padding:18px;margin:0;text-align:center;font-size:1.9em;font-weight:600}
-
-    .cover{max-width:1000px;margin:15px auto;background:white;border-radius:12px;overflow:hidden;
-           box-shadow:0 6px 25px rgba(0,0,0,0.15);position:relative;cursor:pointer;text-align:center}
-    .cover img{width:100%;max-height:400px;object-fit:cover;display:block}
-    .cover-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);color:white;
-                   font-size:1.8em;display:flex;align-items:center;justify-content:center}
-    .cover input{position:absolute;inset:0;opacity:0;cursor:pointer}
-    #coverPlaceholder{padding:100px;background:#e3f2fd;color:#1565c0;font-size:1.6em}
-
-    .cover-info{padding:20px;background:white;color:#333;font-size:1.4em;font-weight:600;display:none;position:relative}
-    .cover-info .project{font-size:1.8em;color:var(--primary);margin-bottom:8px}
-    .cover-info .surveyor{font-size:1.3em;color:#555;margin-top:12px}
-
-    .controls{background:white;padding:12px;position:sticky;top:0;z-index:100;
-              box-shadow:0 4px 15px rgba(0,0,0,0.1);display:flex;flex-wrap:wrap;gap:10px;
-              justify-content:center;align-items:center;font-size:14px}
-    button{padding:10px 20px;border:none;border-radius:6px;color:white;font-weight:600;cursor:pointer}
-    #addBtn{background:var(--accent);font-size:16px;padding:12px 28px !important}
-    #saveProject{background:var(--success)}#loadProjectBtn{background:#007bff}
-    #printBtn,#exportPdfBtn{background:#6f42c1}
-    input[type=text]{padding:9px;border:1px solid #ccc;border-radius:6px;min-width:160px}
-
-    .container{max-width:1100px;margin:20px auto;padding:0 10px}
-    .door-row{display:flex;align-items:flex-start;gap:16px;margin-bottom:40px;
-               page-break-inside:avoid;break-inside:avoid}
-    .door{flex:1;background:white;border-radius:12px;overflow:hidden;
-          box-shadow:0 6px 25px rgba(0,0,0,0.12);font-size:14px}
-    .delete-wrapper{display:flex;align-items:center;padding-top:12px}
-    .delete-btn{background:#dc3545;color:white;border:none;border-radius:50%;
-                width:40px;height:40px;font-size:22px;line-height:40px;cursor:pointer;
-                box-shadow:0 4px 12px rgba(220,53,69,0.4);transition:all .2s}
-    .delete-btn:hover{transform:scale(1.15)}
-
-    .door-header{background:var(--dark);color:white;padding:18px 24px;font-size:1.4em;
-                 display:flex;justify-content:space-between;align-items:center;font-weight:600}
-    .status{padding:9px 32px;border-radius:30px;font-weight:bold;cursor:pointer;font-size:1em}
-    .pass{background:var(--success)}.fail{background:var(--danger)}
-
-    .content{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:20px}
-    @media(max-width:850px){.content{grid-template-columns:1fr;gap:18px;padding:18px}}
-
-    label{display:block;margin:10px 0 5px;font-weight:600;font-size:0.95em;color:#222}
-    input[type=text],select,textarea{width:100%;padding:8px;border:1px solid #ccc;
-                                    border-radius:6px;font-size:0.95em;box-sizing:border-box}
-    textarea{min-height:78px;resize:vertical}
-
-    .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
-    .photo{border:2px dashed #999;height:240px;border-radius:10px;overflow:hidden;position:relative;
-           background:#f9f9f9;display:flex;align-items:center;justify-content:center;
-           text-align:center;color:#666;font-size:0.9em}
-    .photo img{width:100%;height:100%;object-fit:cover}
-    .photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
-
-    #summaryPage{background:white;padding:40px 60px;margin:60px auto 20px;
-                 border:4px solid var(--primary);border-radius:16px;max-width:1000px;
-                 box-shadow:0 10px 40px rgba(0,0,0,0.15);page-break-before:always;
-                 font-size:15px;line-height:1.6}
-    #summaryPage h2{color:var(--primary);font-size:2.2em;margin-bottom:20px;text-align:center}
-    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin:30px 0}
-    .summary-box{background:#f8f9fa;padding:25px;border-radius:12px;text-align:center;
-                  font-size:1.4em;font-weight:bold;border:3px solid}
-    .pass-box{border-color:var(--success);color:var(--success);background:#d4edda}
-    .fail-box{border-color:var(--danger);color:var(--danger);background:#f8d7da}
-    .total-box{font-size:2em;padding:30px;background:var(--primary);color:white}
-    .common-failures{margin-top:50px;background:#fff8e1;padding:30px;border-left:6px solid #ffc107;
-                     border-radius:8px;font-size:0.98em}
-
-    @media print{
-        body{background:white}
-        .controls,.cover-overlay,#coverPlaceholder,.photo input,.delete-wrapper{display:none !important}
-        .cover-info{display:block !important}
-        .door-row{display:block}
-        .cover{border-bottom:5px solid var(--primary);margin:0 0 20px 0;break-after:page}
-        .door{border:2px solid #000;margin:20px 0;break-inside:avoid !important;break-after:page !important}
-        .door-header{background:black !important;color:white !important}
-        .photo{border:2px solid #000;height:250px}
-        .photo img{object-fit:contain;background:white}
-        #summaryPage{break-before:page;margin:40px auto;padding:30px;border:3px solid black}
-        @page{margin:0.5in}
-    }
+:root{--primary:#003087;--accent:#0066cc;--success:#28a745;--danger:#dc3545;--gray:#f8f9fa;--dark:#1a1a1a}
+body{font-family:'Segoe UI',Arial,sans-serif;margin:0;background:var(--gray);color:#333;line-height:1.4}
+h1{background:var(--primary);color:white;padding:18px;margin:0;text-align:center;font-size:1.9em;font-weight:600}
+.cover{max-width:1000px;margin:15px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 6px 25px rgba(0,0,0,0.15);position:relative;cursor:pointer;text-align:center}
+.cover img{width:100%;max-height:400px;object-fit:cover;display:block}
+.cover-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);color:white;font-size:1.8em;display:flex;align-items:center;justify-content:center}
+.cover input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#coverPlaceholder{padding:100px;background:#e3f2fd;color:#1565c0;font-size:1.6em}
+.cover-info{padding:20px;background:white;color:#333;font-size:1.4em;font-weight:600;display:none;position:relative}
+.cover-info .project{font-size:1.8em;color:var(--primary);margin-bottom:8px}
+.cover-info .surveyor{font-size:1.3em;color:#555;margin-top:12px}
+.controls{background:white;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 15px rgba(0,0,0,0.1);display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;font-size:14px}
+button{padding:10px 20px;border:none;border-radius:6px;color:white;font-weight:600;cursor:pointer}
+#addBtn{background:var(--accent);font-size:16px;padding:12px 28px !important}
+#saveProject{background:var(--success)}#loadProjectBtn{background:#007bff}
+#printBtn,#exportPdfBtn{background:#6f42c1}
+input[type=text]{padding:9px;border:1px solid #ccc;border-radius:6px;min-width:160px}
+.container{max-width:1100px;margin:20px auto;padding:0 10px}
+.door-row{display:flex;align-items:flex-start;gap:16px;margin-bottom:40px;page-break-inside:avoid;break-inside:avoid}
+.door{flex:1;background:white;border-radius:12px;overflow:hidden;box-shadow:0 6px 25px rgba(0,0,0,0.12);font-size:14px}
+.delete-wrapper{display:flex;align-items:center;padding-top:12px}
+.delete-btn{background:#dc3545;color:white;border:none;border-radius:50%;width:40px;height:40px;font-size:22px;line-height:40px;cursor:pointer;box-shadow:0 4px 12px rgba(220,53,69,0.4)}
+.delete-btn:hover{transform:scale(1.15)}
+.door-header{background:var(--dark);color:white;padding:18px 24px;font-size:1.4em;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.status{padding:9px 32px;border-radius:30px;font-weight:bold;cursor:pointer;font-size:1em}
+.pass{background:var(--success)}.fail{background:var(--danger)}
+.content{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:20px}
+@media(max-width:850px){.content{grid-template-columns:1fr;gap:18px;padding:18px}}
+label{display:block;margin:10px 0 5px;font-weight:600;font-size:0.95em;color:#222}
+input[type=text],select,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:0.95em;box-sizing:border-box}
+textarea{min-height:78px;resize:vertical}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.photo{border:2px dashed #999;height:240px;border-radius:10px;overflow:hidden;position:relative;background:#f9f9f9;display:flex;align-items:center;justify-content:center;text-align:center;color:#666;font-size:0.9em}
+.photo img{width:100%;height:100%;object-fit:cover}
+.photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#summaryPage{background:white;padding:40px 60px;margin:60px auto 20px;border:4px solid var(--primary);border-radius:16px;max-width:1000px;box-shadow:0 10px 40px rgba(0,0,0,0.15);page-break-before:always;font-size:15px;line-height:1.6}
+#summaryPage h2{color:var(--primary);font-size:2.2em;margin-bottom:20px;text-align:center}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin:30px 0}
+.summary-box{background:#f8f9fa;padding:25px;border-radius:12px;text-align:center;font-size:1.4em;font-weight:bold;border:3px solid}
+.pass-box{border-color:var(--success);color:var(--success);background:#d4edda}
+.fail-box{border-color:var(--danger);color:var(--danger);background:#f8d7da}
+.total-box{font-size:2em;padding:30px;background:var(--primary);color:white}
+.common-failures{margin-top:50px;background:#fff8e1;padding:30px;border-left:6px solid #ffc107;border-radius:8px;font-size:0.98em}
+@media print{
+    body{background:white}
+    .controls,.cover-overlay,#coverPlaceholder,.photo input,.delete-wrapper{display:none !important}
+    .cover-info{display:block !important}
+    .door-row{display:block}
+    .cover{border-bottom:5px solid var(--primary);margin:0 0 20px 0;break-after:page}
+    .door{border:2px solid #000;margin:20px 0;break-inside:avoid !important;break-after:page !important}
+    .door-header{background:black !important;color:white !important}
+    .photo{border:2px solid #000;height:250px}
+    .photo img{object-fit:contain;background:white}
+    #summaryPage{break-before:page;margin:40px auto;padding:30px;border:3px solid black}
+    @page{margin:0.5in}
+}
 </style>
 </head>
 <body>
@@ -101,7 +74,6 @@
     <input type="file" id="buildingPhotoInput" accept="image/*">
     <img id="buildingPhoto" src="" style="display:none">
     <div id="coverPlaceholder">Building / Facility Photo<br><small>Click anywhere to upload</small></div>
-
     <div class="cover-info">
         <div class="project" id="printProjectName">Project Name</div>
         <div>Fire Door Inspection Report</div>
@@ -139,23 +111,17 @@
 </div>
 
 <script>
-// IndexedDB for reliable cover photo in print/PDF
-const COVER_DB = 'CoverPhotoDB';
-const COVER_STORE = 'photos';
+// IndexedDB + onbeforeprint = bulletproof cover photo in PDF
 let coverPhotoDataUrl = null;
-
-const dbOpen = indexedDB.open(COVER_DB, 1);
-dbOpen.onupgradeneeded = e => e.target.result.createObjectStore(COVER_STORE);
-dbOpen.onsuccess = e => {
-    const db = e.target.result;
-    const tx = db.transaction(COVER_STORE, 'readonly');
-    const req = tx.objectStore(COVER_STORE).get('cover');
-    req.onsuccess = () => {
-        if (req.result) {
-            coverPhotoDataUrl = req.result;
+const db = indexedDB.open('CoverDB',1);
+db.onupgradeneeded = e => e.target.result.createObjectStore('photos');
+db.onsuccess = e => {
+    const tx = e.target.result.transaction('photos','readonly').objectStore('photos').get('cover');
+    tx.onsuccess = () => {
+        if (tx.result) {
+            coverPhotoDataUrl = tx.result;
             const img = document.getElementById('buildingPhoto');
-            img.src = coverPhotoDataUrl;
-            img.style.display = 'block';
+            img.src = coverPhotoDataUrl; img.style.display = 'block';
             document.querySelector('.cover-overlay').style.display = 'none';
             document.getElementById('coverPlaceholder').style.display = 'none';
         }
@@ -163,52 +129,32 @@ dbOpen.onsuccess = e => {
 };
 
 document.getElementById('coverArea').onclick = () => document.getElementById('buildingPhotoInput').click();
-
 document.getElementById('buildingPhotoInput').onchange = async e => {
     const file = e.target.files[0];
     if (!file) return;
-    const dataUrl = await fileToBase64(file);
-    coverPhotoDataUrl = dataUrl;
-
+    coverPhotoDataUrl = await new Promise(r => {let fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(file);});
     const img = document.getElementById('buildingPhoto');
-    img.src = dataUrl;
-    img.style.display = 'block';
+    img.src = coverPhotoDataUrl; img.style.display = 'block';
     document.querySelector('.cover-overlay').style.display = 'none';
     document.getElementById('coverPlaceholder').style.display = 'none';
-
-    // Save to IndexedDB
-    const db = await new Promise((res, rej) => {
-        const open = indexedDB.open(COVER_DB, 1);
-        open.onsuccess = () => res(open.result);
-        open.onerror = rej;
-    });
-    const tx = db.transaction(COVER_STORE, 'readwrite');
-    tx.objectStore(COVER_STORE).put(dataUrl, 'cover');
-    await tx.done;
+    // save to IndexedDB
+    const open = indexedDB.open('CoverDB',1);
+    open.onsuccess = ev => {
+        ev.target.result.transaction('photos','readwrite').objectStore('photos').put(coverPhotoDataUrl,'cover');
+    };
 };
 
-// Inject cover photo directly into print DOM
 window.onbeforeprint = () => {
-    if (coverPhotoDataUrl) {
-        const existing = document.getElementById('print-cover-img');
-        if (existing) existing.remove();
-        const printImg = document.createElement('img');
-        printImg.src = coverPhotoDataUrl;
-        printImg.style.cssText = 'max-width:100%;height:auto;display:block;margin-bottom:20px;page-break-after:avoid;';
-        printImg.id = 'print-cover-img';
-        document.querySelector('.cover-info').insertAdjacentElement('afterbegin', printImg);
-    }
+    if (!coverPhotoDataUrl) return;
+    const existing = document.getElementById('pdf-cover');
+    if (existing) existing.remove();
+    const i = document.createElement('img');
+    i.src = coverPhotoDataUrl;
+    i.id = 'pdf-cover';
+    i.style.cssText = 'max-width:100%;height:auto;display:block;margin-bottom:20px;';
+    document.querySelector('.cover-info').insertAdjacentElement('beforebegin', i);
 };
-window.onafterprint = () => document.getElementById('print-cover-img')?.remove();
-
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
+window.onafterprint = () => document.getElementById('pdf-cover')?.remove();
 
 function updateCoverText() {
     document.getElementById('printProjectName').textContent = document.getElementById('projectName').value || 'Fire Door Inspection Report';
@@ -217,25 +163,20 @@ function updateCoverText() {
 document.getElementById('projectName').oninput = updateCoverText;
 document.getElementById('surveyor').oninput = updateCoverText;
 
-// Rest of your perfectly-working app code (unchanged)
-const App = { /* ... same as before ... */ };
-/* All createDoor(), save/load, search, etc. — exactly the same as the last fully-working version you had */
-
 const App = {
     doorNum: 1,
     container: document.getElementById('container'),
     updateSummary() {
-        const pass = document.querySelectorAll('.status.pass').length;
-        const fail = document.querySelectorAll('.status.fail').length;
-        document.getElementById('passCount').textContent = pass;
-        document.getElementById('failCount').textContent = fail;
-        document.getElementById('totalCount').textContent = pass + fail;
+        const p = document.querySelectorAll('.status.pass').length;
+        const f = document.querySelectorAll('.status.fail').length;
+        document.getElementById('passCount').textContent = p;
+        document.getElementById('failCount').textContent = f;
+        document.getElementById('totalCount').textContent = p + f;
     },
     renumberDoors() {
-        document.querySelectorAll('.door-row').forEach((row, i) => {
-            const num = i + 1;
-            const headerText = row.querySelector('.door-header span');
-            if (headerText) headerText.firstChild.textContent = `Door #${num}: `;
+        document.querySelectorAll('.door-row').forEach((r,i) => {
+            const h = r.querySelector('.door-header span');
+            if (h) h.innerHTML = `Door #${i+1}: <span class="title">${r.querySelector('.doorId').value||'New Door'}</span>`;
         });
         App.doorNum = document.querySelectorAll('.door-row').length + 1;
         App.updateSummary();
@@ -243,19 +184,97 @@ const App = {
 };
 
 function createDoor() {
-    const row = document.createElement('div');
-    row.className = 'door-row';
-    row.innerHTML = `...`; // (same full door HTML as always — omitted here only for brevity, but it’s complete in the real file)
-    /* all event listeners exactly as before */
-    App.container.appendChild(row);
-    App.doorNum++;
-    App.updateSummary();
+    const row = document.createElement('div'); row.className = 'door-row';
+    row.innerHTML = `
+        <div class="door">
+            <div class="door-header">
+                <span>Door #${App.doorNum}: <span class="title">New Door</span></span>
+                <div class="status fail" onclick="this.classList.toggle('pass');this.classList.toggle('fail');this.textContent=this.classList.contains('pass')?'PASS':'FAIL';App.updateSummary();">FAIL</div>
+            </div>
+            <div class="content">
+                <div>
+                    <label>Door ID / Number</label><input type="text" class="doorId" placeholder="e.g. 201">
+                    <label>Location</label><input type="text" class="location" placeholder="e.g. 2nd Floor Corridor">
+                    <label>Door Type</label>
+                    <select><option>Hollow Metal</option><option>Wood</option><option>Glass/Aluminum</option><option>Fire-Rated</option><option>Other</option></select>
+                    <label>Fire Rating</label>
+                    <select><option>None</option><option>20 min</option><option>45 min</option><option>60 min</option><option>90 min</option><option>3 Hour</option></select>
+                    <label>Issues Found</label><textarea placeholder="e.g. Missing closer, damaged seal"></textarea>
+                    <label>Recommended Action</label><textarea placeholder="e.g. Replace closer, adjust strike"></textarea>
+                </div>
+                <div>
+                    <label>Photos</label>
+                    <div class="photo-grid">
+                        <div class="photo"><span>Outside<br><small>Click to add</small></span><input type="file" accept="image/*"></div>
+                        <div class="photo"><span>Hardware<br><small>Click to add</small></span><input type="file" accept="image/*"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="delete-wrapper"><button class="delete-btn" title="Delete this door">×</button></div>
+    `;
+    row.querySelector('.doorId').oninput = e => row.querySelector('.title').textContent = e.target.value || 'New Door';
+    row.querySelectorAll('.photo input').forEach(inp => {
+        inp.onchange = async function() {
+            if (!this.files[0]) return;
+            const url = await new Promise(r => {let fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(this.files[0]);});
+            this.parentElement.innerHTML = `<img src="${url}">`;
+        };
+    });
+    row.querySelector('.delete-btn').onclick = () => {if(confirm('Delete this door?')){row.remove();App.renumberDoors();}};
+    App.container.appendChild(row); App.doorNum++; App.updateSummary();
 }
 
-/* All the rest of the script (save, load, search, buttons, init) is 100% unchanged and fully included in the real file */
+document.getElementById('addBtn').onclick = createDoor;
+document.getElementById('printBtn').onclick = document.getElementById('exportPdfBtn').onclick = () => window.print();
+document.getElementById('saveProject').onclick = async () => {
+    const doors = await Promise.all(Array.from(document.querySelectorAll('.door-row')).map(async r => ({
+        id: r.querySelector('.doorId').value,
+        location: r.querySelector('.location').value,
+        type: r.querySelectorAll('select')[0].value,
+        rating: r.querySelectorAll('select')[1].value,
+        issues: r.querySelectorAll('textarea')[0].value,
+        action: r.querySelectorAll('textarea')[1].value,
+        photos: Array.from(r.querySelectorAll('.photo img')).map(i=>i.src),
+        status: r.querySelector('.status').textContent
+    })));
+    const data = {projectName:document.getElementById('projectName').value,surveyor:document.getElementById('surveyor').value,buildingPhoto:coverPhotoDataUrl,doors};
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    a.download = (data.projectName||'FireDoorSurvey')+'.json';
+    a.click();
+};
+document.getElementById('loadProjectBtn').onclick = () => document.getElementById('loadFile').click();
+document.getElementById('loadFile').onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+        try {
+            const d = JSON.parse(ev.target.result);
+            document.getElementById('projectName').value = d.projectName||'';
+            document.getElementById('surveyor').value = d.surveyor||'';
+            updateCoverText();
+            if(d.buildingPhoto){coverPhotoDataUrl=d.buildingPhoto; const img=document.getElementById('buildingPhoto'); img.src=coverPhotoDataUrl; img.style.display='block'; document.querySelector('.cover-overlay').style.display='none'; document.getElementById('coverPlaceholder').style.display='none';}
+            App.container.innerHTML=''; App.doorNum=1;
+            d.doors.forEach(dd => {createDoor(); const row=App.container.lastElementChild;
+                row.querySelector('.doorId').value=dd.id||''; row.querySelector('.location').value=dd.location||'';
+                row.querySelectorAll('select')[0].value=dd.type||'Hollow Metal'; row.querySelectorAll('select')[1].value=dd.rating||'None';
+                row.querySelectorAll('textarea')[0].value=dd.issues||''; row.querySelectorAll('textarea')[1].value=dd.action||'';
+                row.querySelector('.title').textContent=dd.id||'New Door';
+                if(dd.status==='PASS'){const s=row.querySelector('.status');s.classList.add('pass');s.classList.remove('fail');s.textContent='PASS';}
+                dd.photos.forEach((src,i)=> {if(src) row.querySelectorAll('.photo')[i].innerHTML=`<img src="${src}">`;});
+            });
+            App.updateSummary();
+        } catch{alert('Invalid file');}
+    };
+    r.readAsText(f);
+};
+document.getElementById('searchBar').oninput = e => {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.door-row').forEach(r => r.style.display = r.textContent.toLowerCase().includes(term)?'':'none');
+};
 
-createDoor();
-updateCoverText();
+createDoor(); updateCoverText();
 </script>
 </body>
 </html>
