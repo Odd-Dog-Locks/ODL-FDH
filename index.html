@@ -124,13 +124,13 @@
         <div>Fire Door Inspection Report</div>
         <div class="surveyor">Surveyor: <span id="printSurveyorName">Name</span></div>
 
-        <!-- Licensure & Qualifications -->
+        <!-- Updated Licensure & Qualifications (your exact text/layout) -->
         <div class="licensure">
             <strong>Inspector Qualifications & Licensure</strong><br>
             <ul>
                 <li>Licensed Locksmith - NY CWP: 2039598-DCA</li>
                 <li>Certified professional Locksmith (CPL) - Penn Foster College</li>
-                <li>Certification - OSHA 30 Hour safety course: 1251367551 </li>
+                <li>Certification - OSHA 30 Hour safety course: 1251367551</li>
                 <li>Qualified Fire Door Inspector – Fire Door institute</li>
                 <li>Licensure / Certification: ch0g2pvm</li>
             </ul>
@@ -144,7 +144,6 @@
 <div class="controls">
     <input type="text" id="projectName" placeholder="Project Name" value="City Hospital – North Wing">
     <input type="text" id="surveyor" placeholder="Surveyor">
-    <input type="text" id="licenseInfo" placeholder="Licensure / Cert #" style="width:220px;">
     <input type="text" id="searchBar" placeholder="Search doors...">
     <button id="addBtn">+ Add Door</button>
     <button id="saveProject">Save Project</button>
@@ -163,6 +162,7 @@
         <div class="summary-box fail-box"><div id="failCount">0</div><div style="font-size:0.7em;margin-top:8px;font-weight:normal">Doors FAIL</div></div>
     </div>
     <div class="summary-box total-box">Total Doors Inspected: <span id="totalCount">0</span></div>
+
     <div class="common-failures">
         <strong>Most Common NFPA 80 / IBC Fire Door Deficiencies Observed:</strong><br><br>
         • Missing or damaged fire-exit hardware • Holes, breaks, or unauthorized modifications • Damaged, missing, or compressed seals<br>
@@ -183,8 +183,9 @@ dbOpen.onsuccess = e => {
     req.onsuccess = () => {
         if (req.result) {
             coverPhotoDataUrl = req.result;
-            document.getElementById('buildingPhoto').src = coverPhotoDataUrl;
-            document.getElementById('buildingPhoto').style.display = 'block';
+            const img = document.getElementById('buildingPhoto');
+            img.src = coverPhotoDataUrl;
+            img.style.display = 'block';
             document.querySelector('.cover-overlay').style.display = 'none';
             document.getElementById('coverPlaceholder').style.display = 'none';
         }
@@ -227,20 +228,13 @@ window.onbeforeprint = () => {
 };
 window.onafterprint = () => document.getElementById('pdf-cover')?.remove();
 
-// Update printed cover text (project & surveyor)
 function updateCoverText() {
     document.getElementById('printProjectName').textContent = document.getElementById('projectName').value || 'Fire Door Inspection Report';
     document.getElementById('printSurveyorName').textContent = document.getElementById('surveyor').value || 'Surveyor Not Specified';
-    document.getElementById('licenseDisplay').textContent = 
-        document.getElementById('licenseInfo').value 
-        ? `Licensure / Certification #: ${document.getElementById('licenseInfo').value}`
-        : 'Licensure / Certification on file';
 }
 document.getElementById('projectName').oninput = updateCoverText;
 document.getElementById('surveyor').oninput = updateCoverText;
-document.getElementById('licenseInfo').oninput = updateCoverText;
 
-// Rest of the app (unchanged – add door, save/load, etc.)
 const App = {
     doorNum: 1,
     container: document.getElementById('container'),
@@ -332,7 +326,7 @@ document.getElementById('addBtn').onclick = createDoor;
 document.getElementById('printBtn').onclick = () => window.print();
 document.getElementById('exportPdfBtn').onclick = () => window.print();
 
-// SAVE / LOAD (photos saved as Base64)
+// SAVE / LOAD
 document.getElementById('saveProject').onclick = async () => {
     const doorsData = await Promise.all(Array.from(document.querySelectorAll('.door-row')).map(async row => {
         const photos = Array.from(row.querySelectorAll('.photo img')).map(img => img.src);
@@ -351,7 +345,6 @@ document.getElementById('saveProject').onclick = async () => {
     const data = {
         projectName: document.getElementById('projectName').value,
         surveyor: document.getElementById('surveyor').value,
-        licenseInfo: document.getElementById('licenseInfo').value,
         buildingPhoto: coverPhotoDataUrl || null,
         doors: doorsData
     };
@@ -372,7 +365,6 @@ document.getElementById('loadFile').onchange = e => {
             const data = JSON.parse(ev.target.result);
             document.getElementById('projectName').value = data.projectName || '';
             document.getElementById('surveyor').value = data.surveyor || '';
-            document.getElementById('licenseInfo').value = data.licenseInfo || '';
             updateCoverText();
             if (data.buildingPhoto) {
                 coverPhotoDataUrl = data.buildingPhoto;
@@ -422,4 +414,3 @@ updateCoverText();
 </script>
 </body>
 </html>
-
