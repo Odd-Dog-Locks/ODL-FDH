@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fire Door Survey Pro</title>
+<title>Fire Door Helper</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +24,17 @@
     .cover-info .project{font-size:1.8em;color:var(--primary);margin-bottom:8px}
     .cover-info .surveyor{font-size:1.3em;color:#555;margin-top:12px}
 
-    .licensure{border-top:1px solid #ddd;padding-top:15px;margin-top:20px}
+    #licensurePage {
+        background:white;
+        padding:40px 60px;
+        margin:0 auto 40px;
+        max-width:1000px;
+        border:4px solid var(--primary);
+        border-radius:16px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.1);
+        page-break-before:always;
+        display:none;
+    }
     .licensure strong{color:var(--primary)}
     .licensure ul{margin-left:20px;padding-left:0;list-style-type:disc;font-size:0.95em;line-height:1.5}
 
@@ -85,7 +95,7 @@
     @media print{
         body{background:white;margin:0;padding:0}
         .controls,.cover-overlay,#coverPlaceholder,.photo input,.delete-wrapper{display:none !important}
-        .cover-info{display:block !important}
+        .cover-info, #licensurePage{display:block !important}
         .door-row{display:block;page-break-before:always;margin:0}
         .door{border:2px solid #000;margin:0;break-inside:avoid !important;page-break-inside:avoid !important;max-height:none}
         .door-header{background:black !important;color:white !important}
@@ -111,20 +121,23 @@
         <div class="project" id="printProjectName">Project Name</div>
         <div>Fire Door Inspection Report</div>
         <div class="surveyor">Surveyor: <span id="printSurveyorName">Name</span></div>
+    </div>
+</div>
 
-        <div class="licensure">
-            <strong>Inspector Qualifications & Licensure</strong><br>
-            <ul>
-                <li>Licensed Locksmith - NY CWP: 2039598-DCA</li>
-                <li>Certified professional Locksmith (CPL) - Penn Foster College</li>
-                <li>Certification - OSHA 30 Hour safety course: 1251367551 </li>
-                <li>Qualified Fire Door Inspector – Fire Door institute</li>
-                <li>Licensure / Certification: ch0g2pvm</li>
-            </ul>
-            <p style="margin-top:12px;font-size:0.9em;font-style:italic;">
-                All inspections performed by a qualified person as defined in NFPA 80 (5.1.1): individual with recognized training, skill, and knowledge to perform acceptance testing and periodic inspections of fire door assemblies.
-            </p>
-        </div>
+<!-- Separated Licensure Page (starts on page 2 in print) -->
+<div id="licensurePage">
+    <h2>Inspector Qualifications & Licensure</h2>
+    <div class="licensure">
+        <ul>
+            <li>Licensed Locksmith - NY CWP: 2039598-DCA</li>
+            <li>Certified professional Locksmith (CPL) - Penn Foster College</li>
+            <li>Certification - OSHA 30 Hour safety course: 1251367551 </li>
+            <li>Qualified Fire Door Inspector – Fire Door institute</li>
+            <li>Licensure / Certification: ch0g2pvm</li>
+        </ul>
+        <p style="margin-top:20px;font-size:0.95em;font-style:italic;">
+            All inspections performed by a qualified person as defined in NFPA 80 (5.1.1): individual with recognized training, skill, and knowledge to perform acceptance testing and periodic inspections of fire door assemblies.
+        </p>
     </div>
 </div>
 
@@ -158,24 +171,24 @@
 </div>
 
 <script>
-// COVER PHOTO HANDLING – DEBUGGED & MOBILE-SAFE VERSION
+// COVER PHOTO HANDLING – IMPROVED FOR iOS
 document.getElementById('coverArea').onclick = () => {
-    console.log('Cover area clicked');
+    console.log('Cover clicked');
     document.getElementById('buildingPhotoInput').click();
 };
 
 document.getElementById('buildingPhotoInput').onchange = function(e) {
     const file = e.target.files[0];
     if (!file) {
-        console.log('No file selected');
+        console.log('No file');
         return;
     }
-    console.log('File selected:', file.name, file.type, file.size);
+    console.log('File:', file.name, file.size);
 
     const reader = new FileReader();
     reader.onload = function(ev) {
         const dataUrl = ev.target.result;
-        console.log('Data URL generated (length):', dataUrl.length);
+        console.log('Data URL ready, length:', dataUrl.length);
 
         const img = document.getElementById('buildingPhoto');
         img.src = dataUrl;
@@ -183,53 +196,28 @@ document.getElementById('buildingPhotoInput').onchange = function(e) {
         document.querySelector('.cover-overlay').style.display = 'none';
         document.getElementById('coverPlaceholder').style.display = 'none';
 
-        // Force reflow & decode for iOS Safari
-        img.decode().then(() => {
-            console.log('Image decoded successfully');
-            void img.offsetHeight; // reflow
+        // Force iOS to render
+        img.onload = () => {
+            console.log('Image loaded');
+            void img.offsetHeight;
             img.style.opacity = '0.999';
-            setTimeout(() => { img.style.opacity = '1'; }, 100);
-        }).catch(err => {
-            console.error('Image decode failed:', err);
-            alert('Image failed to decode. Try a smaller photo.');
-        });
+            setTimeout(() => img.style.opacity = '1', 100);
+        };
+        img.onerror = () => console.error('Image load error');
     };
-    reader.onerror = function(err) {
-        console.error('FileReader error:', err);
-        alert('Error reading photo file. Try a smaller image or different format.');
-    };
+    reader.onerror = () => console.error('Reader error');
     reader.readAsDataURL(file);
 };
 
-// IndexedDB for persistence (optional fallback, but keeps photo across reloads)
-let coverPhotoDataUrl = null;
-const dbOpen = indexedDB.open('CoverDB', 1);
-dbOpen.onupgradeneeded = e => e.target.result.createObjectStore('photos');
-dbOpen.onsuccess = e => {
-    const db = e.target.result;
-    const tx = db.transaction('photos', 'readonly');
-    const req = tx.objectStore('photos').get('cover');
-    req.onsuccess = () => {
-        if (req.result) {
-            coverPhotoDataUrl = req.result;
-            const img = document.getElementById('buildingPhoto');
-            img.src = coverPhotoDataUrl;
-            img.style.display = 'block';
-            document.querySelector('.cover-overlay').style.display = 'none';
-            document.getElementById('coverPlaceholder').style.display = 'none';
-        }
-    };
-};
-
-// Print/PDF injection
 window.onbeforeprint = () => {
-    if (!coverPhotoDataUrl) return;
+    if (!document.getElementById('buildingPhoto').src) return;
+    const src = document.getElementById('buildingPhoto').src;
     const existing = document.getElementById('pdf-cover');
     if (existing) existing.remove();
     const i = document.createElement('img');
-    i.src = coverPhotoDataUrl;
+    i.src = src;
     i.id = 'pdf-cover';
-    i.style.cssText = 'max-width:100%;height:auto;display:block;margin-bottom:20px;page-break-after:avoid;';
+    i.style.cssText = 'max-width:100%;height:auto;display:block;margin-bottom:20px;';
     document.querySelector('.cover-info').insertAdjacentElement('beforebegin', i);
 };
 window.onafterprint = () => document.getElementById('pdf-cover')?.remove();
@@ -241,7 +229,7 @@ function updateCoverText() {
 document.getElementById('projectName').oninput = updateCoverText;
 document.getElementById('surveyor').oninput = updateCoverText;
 
-// Rest of the app (door logic, save/load, etc.)
+// App logic (unchanged)
 const App = {
     doorNum: 1,
     container: document.getElementById('container'),
