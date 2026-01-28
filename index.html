@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fire Door Survey Pro</title>
+<title>Fire Door Helper</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,13 +27,12 @@
     #licensurePage {
         background:white;
         padding:40px 60px;
-        margin:60px auto 20px;
+        margin:0 auto 0;
         max-width:1000px;
         border:4px solid var(--primary);
         border-radius:16px;
         box-shadow:0 6px 20px rgba(0,0,0,0.1);
         page-break-before:always;
-        page-break-after:always;
         display:none;
     }
     #licensurePage h2{color:var(--primary);font-size:2.0em;margin-bottom:20px;text-align:center}
@@ -125,7 +124,7 @@
     </div>
 </div>
 
-<!-- Licensure Page (page 2 in print) -->
+<!-- Licensure Page (starts on page 2, no blanks before/after) -->
 <div id="licensurePage">
     <h2>Inspector Qualifications & Licensure</h2>
     <ul>
@@ -170,19 +169,30 @@
 </div>
 
 <script>
-// COVER PHOTO HANDLING – iOS FIX (2025)
+// COVER PHOTO HANDLING – OUT-OF-THE-BOX iOS FIX (use canvas for compression & rendering)
+async function compressAndRenderCover(file) {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await new Promise(r => img.onload = r);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // compress to JPEG 70%
+    return dataUrl;
+}
+
 document.getElementById('coverArea').onclick = () => document.getElementById('buildingPhotoInput').click();
 
-document.getElementById('buildingPhotoInput').onchange = async function(e) {
+document.getElementById('buildingPhotoInput').onchange = async e => {
     const file = e.target.files[0];
     if (!file) return;
+
     try {
-        const dataUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
+        const dataUrl = await compressAndRenderCover(file);
 
         const img = document.getElementById('buildingPhoto');
         img.src = dataUrl;
@@ -190,18 +200,17 @@ document.getElementById('buildingPhotoInput').onchange = async function(e) {
         document.querySelector('.cover-overlay').style.display = 'none';
         document.getElementById('coverPlaceholder').style.display = 'none';
 
-        // Force iOS Safari to render
-        await img.decode();
-        void img.offsetHeight;
-        img.style.opacity = '0.999';
-        setTimeout(() => img.style.opacity = '1', 100);
+        // Save to IndexedDB
+        const open = indexedDB.open('CoverDB', 1);
+        open.onsuccess = ev => {
+            ev.target.result.transaction('photos', 'readwrite').objectStore('photos').put(dataUrl, 'cover');
+        };
     } catch (err) {
-        console.error('Cover photo error:', err);
-        alert('Error loading photo. Try a smaller image or different format.');
+        alert('Error loading photo. Try a different image.');
     }
 };
 
-// IndexedDB for persistence (load from save)
+// Load from IndexedDB on start
 let coverPhotoDataUrl = null;
 const dbOpen = indexedDB.open('CoverDB', 1);
 dbOpen.onupgradeneeded = e => e.target.result.createObjectStore('photos');
@@ -241,7 +250,7 @@ function updateCoverText() {
 document.getElementById('projectName').oninput = updateCoverText;
 document.getElementById('surveyor').oninput = updateCoverText;
 
-// App logic (unchanged)
+// Rest of the app (unchanged)
 const App = {
     doorNum: 1,
     container: document.getElementById('container'),
@@ -376,7 +385,7 @@ document.getElementById('loadFile').onchange = e => {
             if (data.buildingPhoto) {
                 coverPhotoDataUrl = data.buildingPhoto;
                 const img = document.getElementById('buildingPhoto');
-                img.src = coverPhotoDataUrl;
+                img.src = data.buildingPhoto;
                 img.style.display = 'block';
                 document.querySelector('.cover-overlay').style.display = 'none';
                 document.getElementById('coverPlaceholder').style.display = 'none';
